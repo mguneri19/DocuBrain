@@ -173,17 +173,22 @@ with tab1:
                 # Index files
                 with st.spinner("📚 Dosyalar indeksleniyor..."):
                     try:
-                        result = index_files(saved_paths)
-                        if result:
+                        # Convert string paths to Path objects
+                        from pathlib import Path
+                        path_objects = [Path(p) for p in saved_paths]
+                        result = index_files(path_objects)
+                        if result and len(result) == 2:
+                            docs_count, chunks_count = result
                             st.session_state.vectorstore = get_vectorstore()
                             st.session_state.indexed_files = [os.path.basename(path) for path in saved_paths]
-                            st.success(f"✅ {len(saved_paths)} dosya başarıyla indekslendi!")
+                            st.success(f"✅ {docs_count} dosya, {chunks_count} chunk başarıyla indekslendi!")
                             
                             # Log indexing activity
                             try:
                                 from logger import log_activity
                                 log_activity("indexing", {
-                                    "files_count": len(saved_paths),
+                                    "files_count": docs_count,
+                                    "chunks_count": chunks_count,
                                     "file_names": [os.path.basename(path) for path in saved_paths]
                                 })
                             except:
