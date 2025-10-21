@@ -93,6 +93,45 @@ tab1, tab2 = st.tabs(["📚 Knowledge Base", "💬 Chat"])
 
 with tab1:
     st.write("**Dosya Yükleme**")
+    
+    # Show indexed files if any
+    if st.session_state.indexed_files:
+        st.success(f"📚 **İndekslenen Dosyalar:** {len(st.session_state.indexed_files)}")
+        
+        # File deletion
+        files_to_delete = st.multiselect(
+            "Silinecek dosyaları seçin:",
+            st.session_state.indexed_files,
+            help="Seçili dosyaları silmek için kullanın"
+        )
+        
+        if st.button("🗑️ Seçili Dosyaları Sil", disabled=not files_to_delete):
+            try:
+                from config import UPLOAD_DIRECTORY
+                import os
+                
+                # Delete selected files
+                for file_name in files_to_delete:
+                    file_path = os.path.join(UPLOAD_DIRECTORY, file_name)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                
+                # Update session state
+                st.session_state.indexed_files = [f for f in st.session_state.indexed_files if f not in files_to_delete]
+                
+                # Reset vectorstore if no files left
+                if not st.session_state.indexed_files:
+                    st.session_state.vectorstore = None
+                    st.session_state.retriever = None
+                
+                st.success(f"✅ {len(files_to_delete)} dosya silindi!")
+                st.rerun()
+                
+            except Exception as e:
+                st.error(f"❌ Silme hatası: {str(e)}")
+        
+        st.divider()
+    
     uploaded_files = st.file_uploader(
         "PDF veya DOCX dosyalarınızı yükleyin",
         type=['pdf', 'docx'],
@@ -106,7 +145,49 @@ with tab1:
         
         if st.button("📝 İndeksle", help="Dosyaları vektör veritabanına ekler"):
             st.info("🔄 İndeksleme işlemi başlatılıyor...")
-            st.warning("⚠️ Bu özellik henüz aktif değil. Simple app sürümünde sadece temel arayüz mevcut.")
+            
+            # Try to import indexing modules
+            try:
+                from ingest import index_files, get_vectorstore
+                from config import UPLOAD_DIRECTORY
+                from utils import ensure_dirs
+                
+                # Ensure directories exist
+                ensure_dirs()
+                
+                # Save uploaded files
+                saved_paths = []
+                for uploaded_file in uploaded_files:
+                    # Create upload directory if it doesn't exist
+                    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+                    
+                    # Save file
+                    file_path = os.path.join(UPLOAD_DIRECTORY, uploaded_file.name)
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    saved_paths.append(file_path)
+                
+                # Update session state
+                st.session_state.uploaded_files = saved_paths
+                
+                # Index files
+                with st.spinner("📚 Dosyalar indeksleniyor..."):
+                    try:
+                        result = index_files(saved_paths)
+                        if result:
+                            st.session_state.vectorstore = get_vectorstore()
+                            st.session_state.indexed_files = [os.path.basename(path) for path in saved_paths]
+                            st.success(f"✅ {len(saved_paths)} dosya başarıyla indekslendi!")
+                        else:
+                            st.error("❌ İndeksleme başarısız!")
+                    except Exception as e:
+                        st.error(f"❌ İndeksleme hatası: {str(e)}")
+                        
+            except ImportError as e:
+                st.error(f"❌ Import hatası: {str(e)}")
+                st.warning("⚠️ İndeksleme modülleri yüklenemedi. Ana uygulamayı kullanın.")
+            except Exception as e:
+                st.error(f"❌ Genel hata: {str(e)}")
 
 with tab2:
     st.write("**Sohbet**")
