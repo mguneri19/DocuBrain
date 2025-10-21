@@ -183,16 +183,7 @@ with tab1:
                             st.session_state.indexed_files = [os.path.basename(path) for path in saved_paths]
                             st.success(f"✅ {docs_count} dosya, {chunks_count} chunk başarıyla indekslendi!")
                             
-                            # Log indexing activity
-                            try:
-                                from logger import log_activity
-                                log_activity("indexing", {
-                                    "files_count": docs_count,
-                                    "chunks_count": chunks_count,
-                                    "file_names": [os.path.basename(path) for path in saved_paths]
-                                })
-                            except:
-                                pass  # Logger not available
+                            # Logging removed for simplicity
                         else:
                             st.error("❌ İndeksleme başarısız!")
                     except Exception as e:
@@ -266,18 +257,7 @@ with tab2:
                                 tokens = result["tokens"]
                                 st.caption(f"Token kullanımı: {tokens.get('total_tokens', 'N/A')} | Maliyet: ${tokens.get('total_cost', 'N/A')}")
                             
-                            # Log chat activity
-                            try:
-                                from logger import log_activity
-                                log_activity("chat_rag", {
-                                    "question_length": len(question),
-                                    "answer_length": len(answer),
-                                    "mode": "RAG Chain",
-                                    "answer_style": answer_style,
-                                    **result.get("tokens", {})
-                                })
-                            except:
-                                pass  # Logger not available
+                            # Logging removed for simplicity
                         else:
                             st.error("❌ Cevap oluşturulamadı!")
                     
@@ -312,18 +292,7 @@ with tab2:
                                 tokens = result["tokens"]
                                 st.caption(f"Token kullanımı: {tokens.get('total_tokens', 'N/A')} | Maliyet: ${tokens.get('total_cost', 'N/A')}")
                             
-                            # Log chat activity
-                            try:
-                                from logger import log_activity
-                                log_activity("chat_agent", {
-                                    "question_length": len(question),
-                                    "answer_length": len(answer),
-                                    "mode": "Agent (tools)",
-                                    "answer_style": answer_style,
-                                    **result.get("tokens", {})
-                                })
-                            except:
-                                pass  # Logger not available
+                            # Logging removed for simplicity
                         else:
                             st.error("❌ Agent cevap oluşturamadı!")
                 
@@ -359,62 +328,6 @@ with tab2:
 with tab3:
     st.write("**Kullanıcı Aktivite Logları**")
     
-    try:
-        from logger import get_logs, get_stats, clear_logs
-        
-        # Get statistics
-        stats = get_stats()
-        
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("Toplam Aktivite", stats.get("total_activities", 0))
-        with col2:
-            st.metric("Benzersiz Kullanıcı", stats.get("unique_users", 0))
-        with col3:
-            st.metric("Sohbet Sayısı", stats.get("chat_count", 0))
-        with col4:
-            st.metric("Dosya Yükleme", stats.get("file_uploads", 0))
-        
-        # Token statistics
-        total_tokens = stats.get("total_tokens", 0)
-        total_cost = stats.get("total_cost", 0)
-        
-        if total_tokens > 0:
-            st.info(f"💰 **Token İstatistikleri:** {total_tokens:,} token kullanıldı, Toplam maliyet: ${total_cost:.4f}")
-        
-        st.divider()
-        
-        # Activity distribution chart
-        st.write("**Aktivite Dağılımı:**")
-        activity_dist = stats.get("activity_distribution", {})
-        if activity_dist:
-            import pandas as pd
-            df = pd.DataFrame(list(activity_dist.items()), columns=["Aktivite", "Sayı"])
-            st.bar_chart(df.set_index("Aktivite"))
-        
-        st.divider()
-        
-        # Recent activities
-        st.write("**Son Aktiviteler:**")
-        logs = get_logs(limit=10)
-        
-        if logs:
-            for log in logs:
-                with st.expander(f"{log.get('timestamp', 'N/A')} - {log.get('activity', 'N/A')}"):
-                    st.json(log)
-        else:
-            st.info("Henüz aktivite logu yok.")
-        
-        # Clear logs button
-        if st.button("🗑️ Logları Temizle"):
-            clear_logs()
-            st.success("✅ Loglar temizlendi!")
-            st.rerun()
-            
-    except ImportError as e:
-        st.error(f"❌ Logger import hatası: {str(e)}")
-        st.warning("⚠️ Logger modülü yüklenemedi.")
-    except Exception as e:
-        st.error(f"❌ Log hatası: {str(e)}")
+    st.info("📊 **Logs sekmesi kaldırıldı** - Uygulama daha hafif hale getirildi")
 
 st.info("🎯 **Working DocuBrain** - Ana özellikler yavaş yavaş eklenecek")

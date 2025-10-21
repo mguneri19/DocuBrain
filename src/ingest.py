@@ -125,16 +125,11 @@ def index_files(file_paths: List[Path]) -> Tuple[int, int]:
     vs.add_documents(chunks, ids=ids)
     vs.persist()
     
-    # Build and save BM25 index
-    from hybrid_retriever import build_bm25_index, save_bm25_index
-    bm25 = build_bm25_index(chunks)
-    save_bm25_index(bm25, chunks)
-    
     return len(raw_docs), len(chunks)
 
 def reset_vectorstore():
     """
-    Tüm indekslenmiş veriyi siler (ChromaDB + BM25).
+    Tüm indekslenmiş veriyi siler (ChromaDB).
     
     """
     # Danger: deletes all persisted data

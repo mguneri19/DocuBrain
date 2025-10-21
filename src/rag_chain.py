@@ -19,7 +19,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 from config import SEARCH_TYPE, TOP_K, MMR_LAMBDA, DEFAULT_OPENAI_MODEL
 from utils import format_docs_for_prompt, format_citations
-from hybrid_retriever import build_hybrid_retriever
+# Hybrid retriever removed for simplicity
 
 SYSTEM_PROMPT_SHORT = """
 Sen bir kurumsal bilgi tabanı asistanısın. Verilen CONTEXT içindeki bilgilere dayanarak KISA ve ÖZ cevaplar ver.
@@ -63,27 +63,17 @@ def get_prompt_template(is_short=True):
         ]
     )
 
-def build_retriever(vs: Chroma, search_type: str = SEARCH_TYPE, top_k: int = TOP_K, mmr_lambda: float = MMR_LAMBDA, use_hybrid: bool = True):
+def build_retriever(vs: Chroma, search_type: str = SEARCH_TYPE, top_k: int = TOP_K, mmr_lambda: float = MMR_LAMBDA):
     """
-    Retriever oluşturur - Hybrid (önerilen) veya basit vector search.
+    Basit retriever oluşturur - Vector search.
     
     """
-    if use_hybrid:
-        # Hybrid retriever: BM25 + Vector + RRF + Cross-encoder reranking
-        return build_hybrid_retriever(
-            vectorstore=vs,
-            top_k=top_k,
-            rerank_top_n=top_k,  # RRF'den sonra rerank edilecek chunk sayısı
-            final_top_k=5,  # Final olarak döndürülecek chunk sayısı (isabetli olanlar)
+    if search_type == "mmr":
+        return vs.as_retriever(
+            search_type="mmr",
+            search_kwargs={"k": top_k, "fetch_k": max(50, top_k * 5), "lambda_mult": mmr_lambda},
         )
-    else:
-        # Simple vector search (eski yöntem)
-        if search_type == "mmr":
-            return vs.as_retriever(
-                search_type="mmr",
-                search_kwargs={"k": top_k, "fetch_k": max(50, top_k * 5), "lambda_mult": mmr_lambda},
-            )
-        return vs.as_retriever(search_kwargs={"k": top_k})
+    return vs.as_retriever(search_kwargs={"k": top_k})
 
 def answer_with_chain(llm, retriever, question: str, is_short: bool = True) -> Dict:
     """

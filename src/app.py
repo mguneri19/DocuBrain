@@ -20,7 +20,6 @@ def get_rag_imports():
         from ingest import index_files, get_vectorstore, reset_vectorstore
         from rag_chain import build_retriever, answer_with_chain
         from agent import build_agent, run_agent
-        from logger import log_activity, get_logs, get_stats, clear_logs
         return True, None
     except Exception as e:
         return False, str(e)
@@ -65,7 +64,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from ingest import index_files, get_vectorstore, reset_vectorstore
 from rag_chain import build_retriever, answer_with_chain
 from agent import build_agent, run_agent
-from logger import log_activity, get_logs, get_stats, clear_logs
+# Logger removed for simplicity
 from config import (
     UPLOAD_DIRECTORY, PERSIST_DIRECTORY,
     OPENAI_API_KEY, DEFAULT_OPENAI_MODEL,
@@ -140,7 +139,7 @@ with st.sidebar:
     
 
 # Tabs
-tab_kb, tab_chat, tab_logs = st.tabs(["📁 Knowledge Base", "💬 Chat", "📊 Logs"])
+tab_kb, tab_chat = st.tabs(["📁 Knowledge Base", "💬 Chat"])
 
 with tab_kb:
     st.subheader("Dosya Yükle (PDF / DOCX)")
@@ -202,16 +201,7 @@ with tab_kb:
                 st.session_state.agent_exec = None  # rebuild agent next time
                 st.session_state.indexed_files = path_list  # Store indexed files
                 
-                # Log kaydı
-                log_activity(
-                    activity_type="indexing",
-                    details={
-                        "file_count": len(path_list),
-                        "raw_docs": raw_n,
-                        "chunks": chunk_n,
-                        "duration": f"{elapsed:.1f}s"
-                    }
-                )
+                # Logging removed for simplicity
             except OSError as e:
                 if getattr(e, 'errno', None) == 28:
                     st.error(
@@ -375,21 +365,7 @@ with tab_chat:
                     if cites:
                         st.caption(cites)
             
-            # Log kaydı
-            tokens_info = result.get("tokens", {})
-            log_activity(
-                activity_type="chat_rag",
-                details={
-                    "mode": "RAG Chain",
-                    "answer_style": answer_style,
-                    "question_length": len(question),
-                    "answer_length": len(answer),
-                    "prompt_tokens": tokens_info.get("prompt_tokens", 0),
-                    "completion_tokens": tokens_info.get("completion_tokens", 0),
-                    "total_tokens": tokens_info.get("total_tokens", 0),
-                    "cost_usd": round(tokens_info.get("total_cost", 0), 6)
-                }
-            )
+            # Logging removed for simplicity
         else:
             # Agent modu
             if st.session_state.agent_exec:
@@ -404,108 +380,10 @@ with tab_chat:
                         if cites:
                             st.caption(cites)
                 
-                # Log kaydı
-                tokens_info = result.get("tokens", {})
-                log_activity(
-                    activity_type="chat_agent",
-                    details={
-                        "mode": "Agent (tools)",
-                        "answer_style": answer_style,
-                        "question_length": len(question),
-                        "answer_length": len(answer),
-                        "prompt_tokens": tokens_info.get("prompt_tokens", 0),
-                        "completion_tokens": tokens_info.get("completion_tokens", 0),
-                        "total_tokens": tokens_info.get("total_tokens", 0),
-                        "cost_usd": round(tokens_info.get("total_cost", 0), 6)
-                    }
-                )
+                # Logging removed for simplicity
             else:
                 st.error("Agent başlatılamadı. RAG Chain moduna geçin veya OpenAI anahtarı ekleyin.")
     elif question and not llm:
         st.error("LLM başlatılamadı. OpenAI anahtarı ekleyin veya Ollama kurun.")
 
-with tab_logs:
-    st.subheader("📊 Aktivite Logları")
-    
-    # İstatistikler
-    stats = get_stats()
-    
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.metric("Toplam Aktivite", stats["total_activities"])
-    with col2:
-        st.metric("Benzersiz Kullanıcı", stats["unique_users"])
-    with col3:
-        total_chats = stats["activity_counts"].get("chat_rag", 0) + stats["activity_counts"].get("chat_agent", 0)
-        st.metric("Toplam Sohbet", total_chats)
-    with col4:
-        st.metric("Dosya Yükleme", stats["activity_counts"].get("file_upload", 0))
-    
-    # Token istatistiklerini hesapla
-    logs = get_logs(limit=1000)
-    total_tokens = 0
-    total_cost = 0.0
-    for log in logs:
-        details = log.get("details", {})
-        total_tokens += details.get("total_tokens", 0)
-        total_cost += details.get("cost_usd", 0)
-    
-    with col5:
-        st.metric("Toplam Token", f"{total_tokens:,}")
-    
-    # Maliyet bilgisi
-    if total_cost > 0:
-        st.info(f"💰 **Toplam Maliyet:** ${total_cost:.6f} USD")
-    
-    st.divider()
-    
-    # Aktivite dağılımı
-    if stats["activity_counts"]:
-        st.subheader("📈 Aktivite Dağılımı")
-        activity_df = pd.DataFrame([
-            {"Aktivite": k, "Sayı": v} 
-            for k, v in stats["activity_counts"].items()
-        ])
-        st.bar_chart(activity_df.set_index("Aktivite"))
-    
-    st.divider()
-    
-    # Son aktiviteler
-    st.subheader("🕐 Son Aktiviteler")
-    
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        log_limit = st.slider("Gösterilecek log sayısı", 10, 100, 50)
-    with col2:
-        st.write("")
-        if st.button("🗑️ Logları Temizle", type="secondary"):
-            clear_logs()
-            st.success("Loglar temizlendi!")
-            st.rerun()
-    
-    logs = get_logs(limit=log_limit)
-    
-    if logs:
-        # Logları ters sırada göster (en yeni üstte)
-        for log in reversed(logs):
-            timestamp = log.get("timestamp", "")
-            activity_type = log.get("activity_type", "unknown")
-            user_id = log.get("user_id", "anonymous")
-            details = log.get("details", {})
-            
-            # Emoji seç
-            emoji_map = {
-                "file_upload": "📤",
-                "indexing": "📥",
-                "chat_rag": "💬",
-                "chat_agent": "🤖",
-            }
-            emoji = emoji_map.get(activity_type, "📋")
-            
-            # Detayları göster
-            with st.expander(f"{emoji} {activity_type} - {timestamp[:19]}", expanded=False):
-                st.write(f"**Kullanıcı:** {user_id}")
-                if details:
-                    st.json(details)
-    else:
-        st.info("Henüz log kaydı yok.")
+# Logs tab removed for simplicity
