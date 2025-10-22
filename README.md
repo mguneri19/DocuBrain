@@ -1,33 +1,80 @@
-# 🧠 DocuBrain
+# 🧠 DocuBrain: Intelligent Document Assistant
 
 **Turn your PDFs and Docs into an intelligent assistant.**
 
-DocuBrain, **kullanıcının yüklediği PDF ve DOCX** dosyaları üzerinden **RAG tabanlı** akıllı asistan deneyimi sunar. 
-Aşağıdaki bileşenleri içerir:
-- **Hybrid Retrieval** (BM25 + Vector + RRF + Reranker) ile en isabetli arama
-- **LangChain** ile `RecursiveCharacterTextSplitter` (chunking)
-- **HuggingFaceEmbeddings** (varsayılan: `BAAI/bge-m3` — çok dilli & normalize)
-- **Chroma** (kalıcı vektör veritabanı)
-- **RAG Chains** ve **RAG Agents (tool)** modları
-- **Token tracking** ve **kullanıcı aktivite logları**
-- **Streamlit** ile modern, kullanışlı arayüz
+## Projenin Amacı
 
-> Varsayılan kurulum, **OpenAI** anahtarı varsa ajan modunu da etkinleştirir. Anahtar yoksa, **RAG Chain** modu tek başına çalışır.
+DocuBrain, **Retrieval-Augmented Generation (RAG)** teknolojisi kullanarak, kullanıcıların yüklediği PDF ve DOCX dokümanları üzerinden akıllı soru-cevap sistemi sunan bir web uygulamasıdır. Proje, dokümanların içeriğini anlayarak kullanıcı sorularına doğru ve bağlamsal cevaplar üretmeyi amaçlamaktadır.
 
-## Kurulum
+## Veri Seti Hakkında Bilgi
 
+- **Dosya Formatları**: PDF ve DOCX dokümanları
+- **Doküman İşleme**: RecursiveCharacterTextSplitter ile chunk'lara bölme
+- **Embedding Modeli**: sentence-transformers/all-MiniLM-L6-v2 (hafif ve hızlı)
+- **Vektör Veritabanı**: ChromaDB ile kalıcı depolama
+- **Dil Desteği**: Türkçe ve çok dilli doküman desteği
+
+## Kullanılan Yöntemler
+
+### 🔍 **Retrieval-Augmented Generation (RAG)**
+- **Vector Search**: Semantic similarity ile doküman parçalarını bulma
+- **MMR (Maximum Marginal Relevance)**: Çeşitlilik ve relevans dengesi
+- **Context Assembly**: İlgili parçaları birleştirerek bağlam oluşturma
+
+### 🤖 **İki Farklı Mod**
+- **RAG Chain**: Her soru için otomatik doküman arama ve cevap üretme
+- **Agent Tools**: Akıllı karar verme ile arama (OpenAI tool-calling)
+
+### 🛠️ **Teknoloji Stack**
+- **Frontend**: Streamlit (modern web arayüzü)
+- **LLM**: OpenAI GPT-4o-mini (maliyet optimizasyonu)
+- **Embeddings**: HuggingFace sentence-transformers
+- **Vector DB**: ChromaDB (kalıcı depolama)
+- **Framework**: LangChain (orchestration)
+
+### 📊 **Gelişmiş Özellikler**
+- **Kalıcı Sohbet Geçmişi**: JSON tabanlı depolama
+- **Token Tracking**: API maliyet takibi
+- **Dosya Yönetimi**: Yükleme, silme, durum takibi
+- **Cevap Stilleri**: Kısa/uzun cevap seçenekleri
+
+## Elde Edilen Sonuçlar
+
+### ✅ **Başarılı Özellikler**
+- **Hafif Model**: 90MB embedding modeli ile hızlı başlangıç
+- **Kalıcı Depolama**: Sohbet geçmişi ve doküman indeksleri korunur
+- **İki Mod Desteği**: RAG Chain ve Agent modları
+- **Streamlit Cloud**: Başarılı deployment
+- **Temiz Arayüz**: Kullanıcı dostu interface
+
+### 📈 **Performans Optimizasyonları**
+- **Memory Optimization**: Ağır modeller kaldırıldı
+- **Import Optimization**: Gereksiz bağımlılıklar temizlendi
+- **Code Cleanup**: Kullanılmayan fonksiyonlar kaldırıldı
+- **Deployment Ready**: Streamlit Cloud uyumlu
+
+### 🎯 **Kullanım Senaryoları**
+- **Kurumsal Dokümanlar**: PDF raporları, dökümanlar
+- **Eğitim Materyalleri**: Ders notları, kitaplar
+- **Teknik Dokümantasyon**: API dökümanları, kılavuzlar
+- **Araştırma Makaleleri**: Akademik yayınlar
+
+## Kurulum ve Çalıştırma
+
+### Gereksinimler
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # Gerekirse düzenleyin
 ```
 
-> Eğer **GPU** kullanacaksanız, `sentence-transformers` ve PyTorch için uygun sürümü kurmayı unutmayın.
-
-## Çalıştırma
-
+### Çalıştırma
 ```bash
 streamlit run src/app.py
+```
+
+### Environment Variables
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ## Dosya Yapısı
@@ -38,41 +85,44 @@ docubrain/
 ├── .env.example
 ├── README.md
 ├── storage/
-│   ├── uploads/           # Kullanıcının yüklediği dosyalar
-│   ├── chroma_db/         # Chroma kalıcı veritabanı
-│   └── logs/              # Kullanıcı aktivite logları
+│   ├── uploads/           # Kullanıcı dosyaları
+│   ├── chroma_db/        # ChromaDB veritabanı
+│   └── chat_history.json # Sohbet geçmişi
 └── src/
-    ├── app.py             # Streamlit arayüzü (DocuBrain UI)
-    ├── config.py          # Ayarlar
-    ├── ingest.py          # PDF/DOCX yükle, parçala ve vektörle
-    ├── rag_chain.py       # RAG chain (retrieval + prompt + LLM)
-    ├── agent.py           # RAG agent (retriever tool + agent executor)
-    ├── hybrid_retriever.py # Hybrid retrieval (BM25 + Vector + RRF + Reranker)
-    ├── logger.py          # Kullanıcı aktivite logları
-    └── utils.py           # Yardımcılar (citations vs.)
+    ├── app.py            # Ana Streamlit uygulaması
+    ├── config.py         # Konfigürasyon
+    ├── ingest.py         # Doküman işleme
+    ├── rag_chain.py      # RAG chain + utils
+    ├── agent.py          # Agent modu
+    └── chat_storage.py   # Sohbet depolama
 ```
 
 ## Özellikler
 
 ### 🧠 **Akıllı Arama**
-- **Hybrid Retrieval**: BM25 (sözcüksel) + Vector (anlamsal) + RRF + Reranker
-- **En İsabetli Sonuçlar**: Cross-encoder ile son aşamada reranking
-- **Çok Dilli Destek**: Türkçe ve diğer dillerde mükemmel çalışır
+- **Vector Search**: Semantic similarity ile doküman bulma
+- **MMR Search**: Çeşitlilik ve relevans dengesi
+- **Context Assembly**: İlgili parçaları birleştirme
 
 ### 💬 **İki Mod**
-- **RAG Chain**: Her soru için otomatik arama
-- **Agent Tools**: Akıllı karar verme ile arama (OpenAI gerekli)
+- **RAG Chain**: Otomatik doküman arama
+- **Agent Tools**: Akıllı karar verme (OpenAI gerekli)
 
 ### 📊 **Gelişmiş Özellikler**
-- **Token Tracking**: Gerçek maliyet takibi
-- **Kullanıcı Logları**: Aktivite analizi ve istatistikler
+- **Kalıcı Sohbet**: Sayfa yenileme sonrası korunur
 - **Dosya Yönetimi**: Yükleme, silme, durum takibi
 - **Cevap Stilleri**: Kısa/uzun cevap seçenekleri
+- **Token Tracking**: API maliyet takibi
 
 ## Notlar
-- **Sadece PDF ve DOCX** desteklidir (tasarım gereği).
-- `agent` modu için **tool calling** yeteneği olan bir sohbet modeli gerekir (ör. OpenAI `gpt-4o-mini`). 
-- **Embeddings** varsayılanı HF (`BAAI/bge-m3`) olduğundan API anahtarı gerekmeden yerel çalışır.
-- Chroma veritabanı **kalıcıdır**; Sıfırlamak için uygulama içindeki "Veri Tabanını Sıfırla" butonunu kullanın.
+
+- **Sadece PDF ve DOCX** dosyaları desteklenir
+- **Agent modu** için OpenAI API anahtarı gerekli
+- **Embeddings** yerel olarak çalışır (API anahtarı gerektirmez)
+- **ChromaDB** kalıcıdır; sıfırlamak için uygulama içindeki butonu kullanın
+
+## Web Linki
+
+**🚀 Canlı Demo**: [DocuBrain on Streamlit Cloud](https://docubrain.streamlit.app/)
 
 **DocuBrain ile dokümanlarınızı akıllı asistanınıza dönüştürün!** 🚀
