@@ -9,7 +9,7 @@ PERSIST_DIRECTORY = Path(os.getenv("PERSIST_DIRECTORY", "storage/chroma_db"))
 UPLOAD_DIRECTORY = Path(os.getenv("UPLOAD_DIRECTORY", "storage/uploads"))
 
 # Embeddings
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "BAAI/bge-m3")
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2")
 
 # Chunking - Optimized for better context
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1500"))  # Daha büyük chunk = daha iyi bağlam
