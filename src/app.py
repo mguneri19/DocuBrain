@@ -71,16 +71,18 @@ from config import (
     SEARCH_TYPE, TOP_K, MMR_LAMBDA
 )
 from rag_chain import ensure_dirs
+from chat_storage import save_chat_history, load_chat_history, clear_chat_history, get_chat_stats
 
 # State
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
 if "retriever" not in st.session_state:
     st.session_state.retriever = None
+# Chat history will be loaded from file storage
 if "chat_history_chain" not in st.session_state:
-    st.session_state.chat_history_chain = []
+    st.session_state.chat_history_chain = load_chat_history("rag_chain")
 if "chat_history_agent" not in st.session_state:
-    st.session_state.chat_history_agent = []
+    st.session_state.chat_history_agent = load_chat_history("agent")
 if "agent_exec" not in st.session_state:
     st.session_state.agent_exec = None
 if "uploaded_files" not in st.session_state:
@@ -287,9 +289,22 @@ with tab_chat:
         st.subheader("Sohbet")
     with col2:
         if st.button("🗑️ Sohbeti Temizle", help="Tüm sohbet geçmişini sil"):
+            clear_chat_history()  # Tüm sohbet geçmişini temizle
             st.session_state.chat_history_chain = []
             st.session_state.chat_history_agent = []
+            st.success("✅ Sohbet geçmişi temizlendi!")
             st.rerun()
+    
+    # Sohbet istatistikleri
+    chat_stats = get_chat_stats()
+    if chat_stats["total_messages"] > 0:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Toplam Mesaj", chat_stats["total_messages"])
+        with col2:
+            st.metric("RAG Chain", chat_stats["rag_chain_messages"])
+        with col3:
+            st.metric("Agent", chat_stats["agent_messages"])
     # Ensure vectorstore
     if st.session_state.vectorstore is None:
         try:
@@ -355,6 +370,10 @@ with tab_chat:
             answer = result["answer"]
             cites = result["citations"]
             st.session_state.chat_history_chain.append(AIMessage(content=answer + ("\n\n" + cites if cites else "")))
+            
+            # Sohbet geçmişini dosyaya kaydet
+            save_chat_history(st.session_state.chat_history_chain, "rag_chain")
+            
             with chat_container:
                 with st.chat_message("assistant"):
                     st.markdown(answer)
@@ -370,6 +389,10 @@ with tab_chat:
                 answer = result["answer"]
                 cites = result["citations"]
                 st.session_state.chat_history_agent.append(AIMessage(content=answer + ("\n\n" + cites if cites else "")))
+                
+                # Sohbet geçmişini dosyaya kaydet
+                save_chat_history(st.session_state.chat_history_agent, "agent")
+                
                 with chat_container:
                     with st.chat_message("assistant"):
                         st.markdown(answer)
