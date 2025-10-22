@@ -34,7 +34,6 @@ DocuBrain, **Retrieval-Augmented Generation (RAG)** teknolojisi kullanarak, kull
 
 ### 📊 **Gelişmiş Özellikler**
 - **Kalıcı Sohbet Geçmişi**: JSON tabanlı depolama
-- **Token Tracking**: API maliyet takibi
 - **Dosya Yönetimi**: Yükleme, silme, durum takibi
 - **Cevap Stilleri**: Kısa/uzun cevap seçenekleri
 
@@ -47,17 +46,14 @@ DocuBrain, **Retrieval-Augmented Generation (RAG)** teknolojisi kullanarak, kull
 - **Streamlit Cloud**: Başarılı deployment
 - **Temiz Arayüz**: Kullanıcı dostu interface
 
-### 📈 **Performans Optimizasyonları**
-- **Memory Optimization**: Ağır modeller kaldırıldı
-- **Import Optimization**: Gereksiz bağımlılıklar temizlendi
-- **Code Cleanup**: Kullanılmayan fonksiyonlar kaldırıldı
-- **Deployment Ready**: Streamlit Cloud uyumlu
 
 ### 🎯 **Kullanım Senaryoları**
-- **Kurumsal Dokümanlar**: PDF raporları, dökümanlar
-- **Eğitim Materyalleri**: Ders notları, kitaplar
-- **Teknik Dokümantasyon**: API dökümanları, kılavuzlar
-- **Araştırma Makaleleri**: Akademik yayınlar
+- **Kurumsal Dokümanlar**: PDF raporları, dökümanlar, şirket politikaları
+- **Eğitim Materyalleri**: Ders notları, kitaplar, eğitim kılavuzları
+- **Teknik Dokümantasyon**: API dökümanları, kılavuzlar, teknik spesifikasyonlar
+- **Araştırma Makaleleri**: Akademik yayınlar, bilimsel makaleler, tezler
+- **Yasal Belgeler**: Sözleşmeler, yasal metinler, düzenlemeler
+- **Tıbbi Dokümantasyon**: Tıbbi raporlar, ilaç kılavuzları, hasta bilgileri
 
 ## Kurulum ve Çalıştırma
 
@@ -112,7 +108,6 @@ docubrain/
 - **Kalıcı Sohbet**: Sayfa yenileme sonrası korunur
 - **Dosya Yönetimi**: Yükleme, silme, durum takibi
 - **Cevap Stilleri**: Kısa/uzun cevap seçenekleri
-- **Token Tracking**: API maliyet takibi
 
 ## Notlar
 
@@ -124,5 +119,9 @@ docubrain/
 ## Web Linki
 
 **🚀 Canlı Demo**: [DocuBrain on Streamlit Cloud](https://docubrain.streamlit.app/)
+
+## 📖 Product Kılavuzu
+
+**📋 Detaylı Kullanım Kılavuzu**: [PRODUCT_GUIDE.md](PRODUCT_GUIDE.md)
 
 **DocuBrain ile dokümanlarınızı akıllı asistanınıza dönüştürün!** 🚀
