@@ -295,79 +295,82 @@ with tab_chat:
             st.success("✅ Sohbet geçmişi temizlendi!")
             st.rerun()
     
-    # Sohbet yönetimi
+    # Sohbet yönetimi - Toggle şeklinde
     if st.session_state.chat_history_chain or st.session_state.chat_history_agent:
         st.divider()
-        st.subheader("📊 Sohbet Yönetimi")
         
-        # Sohbet geçmişini göster
-        all_chats = []
-        for i, msg in enumerate(st.session_state.chat_history_chain):
-            if isinstance(msg, HumanMessage):
-                all_chats.append({
-                    "Mod": "RAG Chain",
-                    "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
-                    "Tip": "Soru",
-                    "Index": f"chain_{i}"
-                })
-            elif isinstance(msg, AIMessage):
-                all_chats.append({
-                    "Mod": "RAG Chain", 
-                    "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
-                    "Tip": "Cevap",
-                    "Index": f"chain_{i}"
-                })
-        
-        for i, msg in enumerate(st.session_state.chat_history_agent):
-            if isinstance(msg, HumanMessage):
-                all_chats.append({
-                    "Mod": "Agent",
-                    "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
-                    "Tip": "Soru",
-                    "Index": f"agent_{i}"
-                })
-            elif isinstance(msg, AIMessage):
-                all_chats.append({
-                    "Mod": "Agent",
-                    "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
-                    "Tip": "Cevap", 
-                    "Index": f"agent_{i}"
-                })
-        
-        if all_chats:
-            # Sohbet listesi
-            df = pd.DataFrame(all_chats)
-            st.dataframe(df, width="stretch", hide_index=True)
+        # Toggle butonu
+        with st.expander("📊 Sohbet Yönetimi", expanded=False):
+            # Sohbet geçmişini göster
+            all_chats = []
+            for i, msg in enumerate(st.session_state.chat_history_chain):
+                if isinstance(msg, HumanMessage):
+                    all_chats.append({
+                        "Mod": "RAG Chain",
+                        "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
+                        "Tip": "Soru",
+                        "Index": f"chain_{i}"
+                    })
+                elif isinstance(msg, AIMessage):
+                    all_chats.append({
+                        "Mod": "RAG Chain", 
+                        "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
+                        "Tip": "Cevap",
+                        "Index": f"chain_{i}"
+                    })
             
-            # Sohbet silme seçeneği
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                selected_chats = st.multiselect(
-                    "Silmek istediğiniz sohbetleri seçin:",
-                    options=[f"{chat['Mod']} - {chat['Tip']} ({chat['Index']})" for chat in all_chats],
-                    help="Birden fazla sohbet seçebilirsiniz"
-                )
-            with col2:
-                st.write("")  # Boşluk için
-                if st.button("🗑️ Seçili Sohbetleri Sil", type="secondary", disabled=not selected_chats):
-                    # Seçili sohbetleri sil
-                    for selected in selected_chats:
-                        # Index'i parse et
-                        if "chain_" in selected:
-                            index = int(selected.split("chain_")[1].split(")")[0])
-                            if index < len(st.session_state.chat_history_chain):
-                                st.session_state.chat_history_chain.pop(index)
-                        elif "agent_" in selected:
-                            index = int(selected.split("agent_")[1].split(")")[0])
-                            if index < len(st.session_state.chat_history_agent):
-                                st.session_state.chat_history_agent.pop(index)
-                    
-                    # Dosyaya kaydet
-                    save_chat_history(st.session_state.chat_history_chain, "rag_chain")
-                    save_chat_history(st.session_state.chat_history_agent, "agent")
-                    
-                    st.success("✅ Seçili sohbetler silindi!")
-                    st.rerun()
+            for i, msg in enumerate(st.session_state.chat_history_agent):
+                if isinstance(msg, HumanMessage):
+                    all_chats.append({
+                        "Mod": "Agent",
+                        "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
+                        "Tip": "Soru",
+                        "Index": f"agent_{i}"
+                    })
+                elif isinstance(msg, AIMessage):
+                    all_chats.append({
+                        "Mod": "Agent",
+                        "Soru": msg.content[:50] + "..." if len(msg.content) > 50 else msg.content,
+                        "Tip": "Cevap", 
+                        "Index": f"agent_{i}"
+                    })
+            
+            if all_chats:
+                # Sohbet listesi
+                df = pd.DataFrame(all_chats)
+                st.dataframe(df, width="stretch", hide_index=True)
+                
+                # Sohbet silme seçeneği
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    selected_chats = st.multiselect(
+                        "Silmek istediğiniz sohbetleri seçin:",
+                        options=[f"{chat['Mod']} - {chat['Tip']} ({chat['Index']})" for chat in all_chats],
+                        help="Birden fazla sohbet seçebilirsiniz"
+                    )
+                with col2:
+                    st.write("")  # Boşluk için
+                    if st.button("🗑️ Seçili Sohbetleri Sil", type="secondary", disabled=not selected_chats):
+                        # Seçili sohbetleri sil
+                        for selected in selected_chats:
+                            # Index'i parse et
+                            if "chain_" in selected:
+                                index = int(selected.split("chain_")[1].split(")")[0])
+                                if index < len(st.session_state.chat_history_chain):
+                                    st.session_state.chat_history_chain.pop(index)
+                            elif "agent_" in selected:
+                                index = int(selected.split("agent_")[1].split(")")[0])
+                                if index < len(st.session_state.chat_history_agent):
+                                    st.session_state.chat_history_agent.pop(index)
+                        
+                        # Dosyaya kaydet
+                        save_chat_history(st.session_state.chat_history_chain, "rag_chain")
+                        save_chat_history(st.session_state.chat_history_agent, "agent")
+                        
+                        st.success("✅ Seçili sohbetler silindi!")
+                        st.rerun()
+            else:
+                st.info("📁 Henüz sohbet geçmişi yok. Sohbet başlatın!")
     else:
         st.info("📁 Henüz sohbet geçmişi yok. Sohbet başlatın!")
     # Ensure vectorstore
