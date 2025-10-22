@@ -123,7 +123,7 @@ def index_files(file_paths: List[Path]) -> Tuple[int, int]:
     # Add with deterministic IDs to avoid duplicates
     ids = [_doc_id(c) for c in chunks]
     vs.add_documents(chunks, ids=ids)
-    vs.persist()
+    # Persist is automatic in newer ChromaDB versions
     
     return len(raw_docs), len(chunks)
 
