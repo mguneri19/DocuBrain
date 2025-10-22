@@ -109,25 +109,4 @@ def clear_chat_history(mode: str = None):
         with open(CHAT_HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
 
-def get_chat_stats() -> Dict[str, Any]:
-    """Sohbet istatistiklerini döndürür."""
-    all_history = load_all_chat_history()
-    
-    stats = {
-        "total_messages": 0,
-        "rag_chain_messages": len(all_history.get("rag_chain", [])),
-        "agent_messages": len(all_history.get("agent", [])),
-        "last_updated": None
-    }
-    
-    stats["total_messages"] = stats["rag_chain_messages"] + stats["agent_messages"]
-    
-    # Son güncelleme zamanını bul
-    for mode in ["rag_chain", "agent"]:
-        messages = all_history.get(mode, [])
-        for msg in messages:
-            if msg.get("timestamp"):
-                if stats["last_updated"] is None or msg["timestamp"] > stats["last_updated"]:
-                    stats["last_updated"] = msg["timestamp"]
-    
-    return stats
+# get_chat_stats function removed - not used

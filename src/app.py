@@ -71,7 +71,7 @@ from config import (
     SEARCH_TYPE, TOP_K, MMR_LAMBDA
 )
 from rag_chain import ensure_dirs
-from chat_storage import save_chat_history, load_chat_history, clear_chat_history, get_chat_stats
+from chat_storage import save_chat_history, load_chat_history, clear_chat_history
 
 # State
 if "vectorstore" not in st.session_state:
