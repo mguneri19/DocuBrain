@@ -22,7 +22,7 @@ from config import (
     PERSIST_DIRECTORY, UPLOAD_DIRECTORY,
     EMBEDDING_MODEL_NAME, CHUNK_SIZE, CHUNK_OVERLAP
 )
-from utils import ensure_dirs
+from rag_chain import ensure_dirs
 
 ALLOWED_EXTS = {".pdf", ".docx"}
 

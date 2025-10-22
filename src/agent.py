@@ -17,7 +17,7 @@ from langchain_core.tools import create_retriever_tool
 from langchain_openai import ChatOpenAI
 
 from config import DEFAULT_OPENAI_MODEL
-from utils import format_citations
+from rag_chain import format_citations
 
 AGENT_SYSTEM_SHORT = """
 Sen bir kurumsal bilgi tabanı ajanısın. SORU'ları yanıtlarken **daima** 'kb_search' aracını kullan.
