@@ -4,8 +4,8 @@ Doküman yükleme ve indeksleme modülü
 Bu modül şu görevleri yerine getirir:
 - PDF ve DOCX dosyalarını yükler
 - Dokümanları chunk'lara böler (RecursiveCharacterTextSplitter)
-- Embeddings oluşturur (HuggingFace BAAI/bge-m3 modeli)
-- ChromaDB'ye indeksler ve BM25 index'i oluşturur
+- Embeddings oluşturur (sentence-transformers/all-MiniLM-L6-v2 modeli)
+- ChromaDB'ye indeksler (hafif ve hızlı model)
 """
 from __future__ import annotations
 from typing import List, Tuple
@@ -88,8 +88,8 @@ def split_documents(docs: List[Document]) -> List[Document]:
 
 def get_embeddings():
     """
-    Embedding modeli oluşturur (HuggingFace BAAI/bge-m3).
-    
+    Embedding modeli oluşturur 
+
     """
     # Force CPU device to avoid GPU/meta-tensor issues on some Windows setups
     return HuggingFaceEmbeddings(
@@ -113,7 +113,7 @@ def get_vectorstore(embedding=None) -> Chroma:
 
 def index_files(file_paths: List[Path]) -> Tuple[int, int]:
     """
-    Dosyaları yükler, chunk'lar ve hem ChromaDB hem BM25'e indeksler.
+    Dosyaları yükler, chunk'lar ve ChromaDB'e indeksler.
     
     """
     raw_docs = load_documents(file_paths)
