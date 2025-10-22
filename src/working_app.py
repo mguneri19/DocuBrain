@@ -72,7 +72,7 @@ with st.sidebar:
     # LLM selection
     llm_provider = st.radio(
         "LLM Sağlayıcısı",
-        ["OpenAI", "Ollama (Fallback)"],
+        ["OpenAI"],
         help="Hangi LLM sağlayıcısını kullanacağınızı seçin"
     )
     
@@ -150,7 +150,7 @@ with tab1:
             try:
                 from ingest import index_files, get_vectorstore
                 from config import UPLOAD_DIRECTORY
-                from utils import ensure_dirs
+                from rag_chain import ensure_dirs
                 
                 # Ensure directories exist
                 ensure_dirs()

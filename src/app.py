@@ -32,7 +32,7 @@ def get_config():
             OPENAI_API_KEY, DEFAULT_OPENAI_MODEL,
             SEARCH_TYPE, TOP_K, MMR_LAMBDA
         )
-        from utils import ensure_dirs
+        from rag_chain import ensure_dirs
         return True, None
     except Exception as e:
         return False, str(e)
@@ -70,7 +70,7 @@ from config import (
     OPENAI_API_KEY, DEFAULT_OPENAI_MODEL,
     SEARCH_TYPE, TOP_K, MMR_LAMBDA
 )
-from utils import ensure_dirs
+from rag_chain import ensure_dirs
 
 # State
 if "vectorstore" not in st.session_state:
