@@ -173,11 +173,7 @@ with tab_kb:
         st.session_state.uploaded_files = saved_paths
         st.success(f"{len(saved_paths)} dosya yüklendi.")
         
-        # Log kaydı
-        log_activity(
-            activity_type="file_upload",
-            details={"file_count": len(saved_paths), "files": [f.name for f in saved_paths]}
-        )
+        # Logging removed for simplicity
 
     if st.button("📥 İndeksle (Chroma'ya ekle)"):
         path_list = [p for p in UPLOAD_DIRECTORY.iterdir() if p.suffix.lower() in [".pdf", ".docx"]]
